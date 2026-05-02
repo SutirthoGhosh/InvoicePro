@@ -1,0 +1,6 @@
+{
+  "name": "WhatsApp Invoice Tool",
+  "description": "A simplified invoice generator for small shopkeepers to quickly create and share invoices via WhatsApp.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}

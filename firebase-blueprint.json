@@ -1,0 +1,66 @@
+{
+  "entities": {
+    "Invoice": {
+      "title": "Invoice",
+      "description": "An invoice generated for a customer",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "invoiceNumber": { "type": "string" },
+        "customerName": { "type": "string" },
+        "customerPhone": { "type": "string" },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "qty": { "type": "number" },
+              "price": { "type": "number" }
+            },
+            "required": ["name", "qty", "price"]
+          }
+        },
+        "total": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["invoiceNumber", "customerPhone", "items", "total", "createdAt"]
+    },
+    "Customer": {
+      "title": "Customer",
+      "description": "Simplified customer record for auto-fill",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "phone": { "type": "string" },
+        "lastInvoiceId": { "type": "string" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["phone", "updatedAt"]
+    },
+    "Config": {
+      "title": "Global Config",
+      "description": "Shared configuration like next invoice number",
+      "type": "object",
+      "properties": {
+        "lastInvoiceNumber": { "type": "number" }
+      },
+      "required": ["lastInvoiceNumber"]
+    }
+  },
+  "firestore": {
+    "invoices/{invoiceId}": {
+      "schema": "Invoice",
+      "description": "Collection of all invoices"
+    },
+    "customers/{customerPhone}": {
+      "schema": "Customer",
+      "description": "Collection of unique customers keyed by phone"
+    },
+    "config/invoices": {
+      "schema": "Config",
+      "description": "Singleton for invoice number tracking"
+    }
+  }
+}

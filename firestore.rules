@@ -1,0 +1,56 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Invoices: Publicly accessible but strict schema
+    match /invoices/{invoiceId} {
+      allow read: if true;
+      allow create: if isValidInvoice(incoming());
+      // No updates or deletes for invoices for simplicity and security
+    }
+
+    // Customers: Publicly accessible but strict schema
+    match /customers/{phone} {
+      allow read: if true;
+      allow create, update: if isValidCustomer(incoming());
+    }
+
+    // Config: Publicly accessible (careful!)
+    match /config/invoices {
+      allow read: if true;
+      allow create, update: if incoming().keys().hasAll(['lastInvoiceNumber']) && incoming().lastInvoiceNumber is number;
+    }
+
+    function isValidInvoice(data) {
+      return data.keys().hasAll(['invoiceNumber', 'customerPhone', 'items', 'total', 'createdAt'])
+        && data.invoiceNumber is string && data.invoiceNumber.size() <= 20
+        && data.customerPhone is string && data.customerPhone.size() <= 20
+        && data.items is list && data.items.size() <= 50
+        && data.total is number && data.total >= 0
+        && data.createdAt is timestamp;
+    }
+
+    function isValidCustomer(data) {
+      return data.keys().hasAll(['phone', 'updatedAt'])
+        && data.phone is string && data.phone.size() <= 20
+        && data.updatedAt is timestamp;
+    }
+  }
+}
